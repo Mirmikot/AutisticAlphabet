@@ -40,6 +40,7 @@ jobs:
         with:
           arguments: ${{ inputs.build-type == 'release' && ':app:bundleRelease :app:assembleRelease' || ':app:assembleDebug' }}
           gradle-version: '8.7'
+          cache-disabled: true
 
       - name: Upload Debug APK
         if: ${{ inputs.build-type != 'release' }}
