@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">AutiKids</string>
+	<string name="next">Дальше</string>
+	<string name="clear">Стереть</string>
+	<string name="congrats">Правильно!</string>
+	<string name="letters_label">Буквы</string>
+	<string name="assembled_word_label">Слово</string>
+	<string name="speak">Озвучить</string>
+</resources>
