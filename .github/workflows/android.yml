@@ -30,34 +30,56 @@ jobs:
       - name: Accept licenses
         run: yes | sdkmanager --licenses
 
-      - name: Gradle build (assemble)
-        uses: gradle/gradle-build-action@v3
+      - name: Install SDKMAN and Gradle 8.9 (to generate wrapper)
+        shell: bash
+        run: |
+          curl -s https://get.sdkman.io | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          sdk install gradle 8.9
+          gradle --version
+
+      - name: Generate Gradle Wrapper (8.9)
+        shell: bash
+        run: |
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          gradle wrapper --gradle-version 8.9
+          chmod +x gradlew
+
+      - name: Setup Gradle (caching only)
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+
+      - name: Build (debug or release)
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.build-type }}" = "release" ]; then
+            ./gradlew :app:bundleRelease :app:assembleRelease
+          else
+            ./gradlew :app:assembleDebug
+          fi
         env:
           RELEASE_STORE_FILE: ${{ secrets.RELEASE_STORE_FILE }}
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-        with:
-          arguments: ${{ inputs.build-type == 'release' && ':app:bundleRelease :app:assembleRelease' || ':app:assembleDebug' }}
-          gradle-version: '8.9'
-          cache-disabled: true
 
       - name: Upload Debug APK
-        if: ${{ inputs.build-type != 'release' }}
+        if: ${{ github.event.inputs.build-type != 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Release APK
-        if: ${{ inputs.build-type == 'release' }}
+        if: ${{ github.event.inputs.build-type == 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: app/build/outputs/apk/release/app-release.apk
 
       - name: Upload Release AAB
-        if: ${{ inputs.build-type == 'release' }}
+        if: ${{ github.event.inputs.build-type == 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-release-aab
