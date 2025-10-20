@@ -30,7 +30,7 @@ jobs:
       - name: Accept licenses
         run: yes | sdkmanager --licenses
 
-      - name: Install SDKMAN and Gradle 8.9 (to generate wrapper)
+      - name: Install SDKMAN and Gradle 8.9
         shell: bash
         run: |
           curl -s https://get.sdkman.io | bash
@@ -38,25 +38,14 @@ jobs:
           sdk install gradle 8.9
           gradle --version
 
-      - name: Generate Gradle Wrapper (8.9)
+      - name: Build (debug or release) with Gradle
         shell: bash
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          gradle wrapper --gradle-version 8.9
-          chmod +x gradlew
-
-      - name: Setup Gradle (caching only)
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
-
-      - name: Build (debug or release)
-        shell: bash
-        run: |
           if [ "${{ github.event.inputs.build-type }}" = "release" ]; then
-            ./gradlew :app:bundleRelease :app:assembleRelease
+            gradle :app:bundleRelease :app:assembleRelease
           else
-            ./gradlew :app:assembleDebug
+            gradle :app:assembleDebug
           fi
         env:
           RELEASE_STORE_FILE: ${{ secrets.RELEASE_STORE_FILE }}
