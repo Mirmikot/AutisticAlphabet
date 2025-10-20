@@ -39,7 +39,7 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         with:
           arguments: ${{ inputs.build-type == 'release' && ':app:bundleRelease :app:assembleRelease' || ':app:assembleDebug' }}
-          gradle-version: '8.7'
+          gradle-version: '8.9'
           cache-disabled: true
 
       - name: Upload Debug APK
